@@ -66,8 +66,8 @@ final class krcpaTest extends TestCase
         $this->assertIsArray($history);
         foreach($history as $event)
         {
-          //$this->assertInstanceOf(KRCPA\Clients\krcpaDoorbot::class,$device);
-          $this->assertIsNumeric($event['id']);
+          $this->assertInstanceOf(KRCPA\Clients\krcpaHistory::class,$event);
+          $this->assertIsNumeric($event->getVariable('id',''));
         }
     }
 

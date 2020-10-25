@@ -151,7 +151,7 @@
       $opts[CURLOPT_URL] = KRCPA_API_URL . $service . $querystring;
       $opts[CURLOPT_HTTPHEADER] = array();
       $opts[CURLOPT_HTTPHEADER][] = "content-type: application/x-www-form-urlencoded";
-      $opts[CURLOPT_HTTPHEADER][] = "Authorization: " . $this->getVariable('token','');
+      $opts[CURLOPT_HTTPHEADER][] = "Authorization: 1" . $this->getVariable('token','');
       $opts[CURLOPT_HTTPHEADER][] = "User-agent: " . KRCPA_USER_AGENT;
       //print_r($opts);
       curl_setopt_array($ch, $opts);
@@ -159,6 +159,7 @@
       $errno = curl_errno($ch);
       curl_close($ch);
       // print_r($result);
+      // print_r($errno);
 
       if ($result === false)
       {
@@ -184,7 +185,13 @@
 
     public function getHistory():array
     {
-      return $this->query('doorbots/history');
+      $arr_history = $this->query('doorbots/history');
+      $result = array();
+      foreach($arr_history as $conf_history)
+      {
+        $result[] = new krcpaHistory($this,$conf_history);
+      }
+      return $result;
     }
 
     // Setters
