@@ -71,5 +71,18 @@ final class krcpaTest extends TestCase
         }
     }
 
+    public function testGetActiveDings(): void
+    {
+        $client = $this::instance(self::$conf);
+        $client->auth_refresh();
+        $dings = $client->getActiveDings();
+        $this->assertIsArray($dings);
+        foreach($dings as $ding)
+        {
+          $this->assertInstanceOf(KRCPA\Clients\krcpaDing::class,$ding);
+          $this->assertIsNumeric($ding->getVariable('id',''));
+        }
+    }
+
 }
 ?>

@@ -5,7 +5,7 @@
  */
   namespace KRCPA\Clients;
 
-  class krcpaDoorbot extends krcpaClient
+  class krcpaDing extends krcpaClient
   {
     public $conf = array();
     protected $client;
@@ -17,8 +17,8 @@
       $config = array_merge(array(),$conf);
 
       $this->setVariable('id',$conf['id']);
-      $this->setVariable('description',$conf['description']);
-      $this->setVariable('battery_life',$conf['battery_life']);
+      $this->setVariable('kind',$conf['kind']);
+      $this->setVariable('doorbot_id',$conf['doorbot_id']);
     }
   }
  ?>

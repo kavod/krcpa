@@ -151,16 +151,29 @@
       $opts[CURLOPT_URL] = KRCPA_API_URL . $service . $querystring;
       $opts[CURLOPT_HTTPHEADER] = array();
       $opts[CURLOPT_HTTPHEADER][] = "content-type: application/x-www-form-urlencoded";
-      $opts[CURLOPT_HTTPHEADER][] = "Authorization: 1" . $this->getVariable('token','');
+      $opts[CURLOPT_HTTPHEADER][] = "Authorization: " . $this->getVariable('token','');
       $opts[CURLOPT_HTTPHEADER][] = "User-agent: " . KRCPA_USER_AGENT;
       //print_r($opts);
       curl_setopt_array($ch, $opts);
       $result = curl_exec($ch);
       $errno = curl_errno($ch);
+      $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
       curl_close($ch);
       // print_r($result);
       // print_r($errno);
-
+      if (!$errno) {
+        switch ($http_code) {
+          case 200:  # OK
+            break;
+          case 401: # Unauthorized
+            echo "nouveau token";
+            $this->auth_refresh();
+            return $this->query($service);
+          default:
+            echo 'Unexpected HTTP code: ', $http_code, "\n";
+            return array();
+        }
+      }
       if ($result === false)
       {
         return false;
@@ -192,6 +205,17 @@
         $result[] = new krcpaHistory($this,$conf_history);
       }
       return $result;
+    }
+
+    public function getActiveDings():array
+    {
+      $json_dings = $this->query('dings/active');
+      $dings = array();
+      foreach($json_dings as $ding)
+      {
+        $dings[] = new krcpaDing($this,$ding);
+      }
+      return $dings;
     }
 
     // Setters
