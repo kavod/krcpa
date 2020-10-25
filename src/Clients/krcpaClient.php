@@ -123,6 +123,11 @@
       return $body;
     }
 
+    public function toString()
+    {
+      return json_encode($this->conf);
+    }
+
     // Getters
     /**
      * Returns a persistent variable.
