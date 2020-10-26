@@ -84,5 +84,12 @@ final class krcpaTest extends TestCase
         }
     }
 
+    public function testGetVersion():void
+    {
+      $client = $this::instance(self::$conf);
+      $client->auth_refresh();
+      $this->assertStringContainsString('.',$client->getVersion()); 
+    }
+
 }
 ?>

@@ -5,6 +5,7 @@
  */
   namespace KRCPA\Clients;
 
+  define('KRCPA_VERSION',"0.1");
   define('KRCPA_API_URL', "https://api.ring.com/clients_api/");
   define('KRCPA_OAUTH_URL', "https://oauth.ring.com/oauth/token");
   define('KRCPA_API_VERSION', "9");
@@ -146,6 +147,11 @@
     {
         return array_key_exists($name,$this->conf) ? $this->conf[$name] : $default;
     }
+
+    public static function getVersion() {
+      return KRCPA_VERSION;
+    }
+
 
     public function query($service): array
     {
