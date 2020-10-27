@@ -50,17 +50,17 @@
         }
     }
 
-    public function auth_password()
+    public function auth_password(): array
     {
-      $this->auth('password');
+      return $this->auth('password');
     }
 
-    public function auth_refresh()
+    public function auth_refresh(): array
     {
-      $this->auth('refresh_token');
+      return $this->auth('refresh_token');
     }
 
-    public function auth($grant_type)
+    public function auth($grant_type): array
     {
       $opts = self::$CURL_OPTS;
       $postfields = array(
@@ -121,7 +121,7 @@
       //print_r($json);
       $this->setVariable('token',$json['token_type'].' '.$json['access_token']);
       $this->setVariable('refresh_token',$json['refresh_token']);
-      return $body;
+      return $json;
     }
 
     public function toString()
