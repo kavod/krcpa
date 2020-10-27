@@ -119,8 +119,11 @@
       list($headers, $body) = explode("\r\n\r\n", $result);
       $json = json_decode($body,true);
       //print_r($json);
-      $this->setVariable('token',$json['token_type'].' '.$json['access_token']);
-      $this->setVariable('refresh_token',$json['refresh_token']);
+      if (array_key_exists('access_token',$json))
+      {
+        $this->setVariable('token',$json['token_type'].' '.$json['access_token']);
+        $this->setVariable('refresh_token',$json['refresh_token']);
+      }
       return $json;
     }
 
