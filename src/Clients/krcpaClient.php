@@ -156,7 +156,7 @@
     }
 
 
-    public function query($service): array
+    public function query($service,$retry=true): array
     {
       $ch = curl_init();
       $opts = self::$CURL_OPTS;
@@ -180,9 +180,15 @@
           case 200:  # OK
             break;
           case 401: # Unauthorized
-            echo "nouveau token";
-            $this->auth_refresh();
-            return $this->query($service);
+            if ($retry)
+            {
+              //echo "nouveau token";
+              if(!$this->auth_refresh())
+                return array();
+              return $this->query($service,$retry=false);
+            } else {
+              return array();
+            }
           default:
             echo 'Unexpected HTTP code: ', $http_code, "\n";
             return array();
@@ -199,13 +205,26 @@
       return $json;
     }
 
+    public function isAuth()
+    {
+      if ($this->getVariable('refresh_token','')=='')
+      {
+        return false;
+      } else {
+        return (count($this->getDevices())>0);
+      }
+    }
+
     public function getDevices()
     {
       $json = $this->query('ring_devices');
       $result = array();
-      foreach($json['doorbots'] as $doorbot)
+      if (array_key_exists('doorbots',$json))
       {
-        $result[] = new krcpaDoorbot($this,$doorbot);
+        foreach($json['doorbots'] as $doorbot)
+        {
+          $result[] = new krcpaDoorbot($this,$doorbot);
+        }
       }
       return $result;
     }

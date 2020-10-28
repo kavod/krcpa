@@ -88,7 +88,33 @@ final class krcpaTest extends TestCase
     {
       $client = $this::instance(self::$conf);
       $client->auth_refresh();
-      $this->assertStringContainsString('.',$client->getVersion()); 
+      $this->assertStringContainsString('.',$client->getVersion());
+    }
+
+    public function testAutoReconnect():void
+    {
+      //$conf = array_merge(array(),self::$conf); # Copy by val
+      $client = $this::instance(self::$conf);
+      $client->auth_refresh();
+      $client->setVariable('token','Bearer Niouf');
+      $devices = $client->getDevices();
+      foreach($devices as $device)
+      {
+        $this->assertInstanceOf(KRCPA\Clients\krcpaDoorbot::class,$device);
+        $this->assertIsNumeric($device->getVariable('battery_life'));
+      }
+    }
+
+    public function testAvoidInfiniteLoop():void
+    {
+      //$conf = array_merge(array(),self::$conf); # Copy by val
+      $client = $this::instance(self::$conf);
+      $client->auth_refresh();
+      $client->setVariable('token','Bearer Niouf');
+      $client->setVariable('refresh_token','Niorf');
+      $devices = $client->getDevices();
+      $this->assertIsArray($devices);
+      $this->assertcount(0,$devices);
     }
 
 }
