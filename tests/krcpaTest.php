@@ -51,7 +51,7 @@ final class krcpaTest extends TestCase
         $client->auth_refresh();
         $devices = $client->getDevices();
         $this->assertIsArray($devices);
-        foreach($devices as $device)
+        foreach($devices['doorbots'] as $device)
         {
           $this->assertInstanceOf(KRCPA\Clients\krcpaDoorbot::class,$device);
           $this->assertIsNumeric($device->getVariable('battery_life'));
@@ -98,7 +98,7 @@ final class krcpaTest extends TestCase
       $client->auth_refresh();
       $client->setVariable('token','Bearer Niouf');
       $devices = $client->getDevices();
-      foreach($devices as $device)
+      foreach($devices['doorbots'] as $device)
       {
         $this->assertInstanceOf(KRCPA\Clients\krcpaDoorbot::class,$device);
         $this->assertIsNumeric($device->getVariable('battery_life'));

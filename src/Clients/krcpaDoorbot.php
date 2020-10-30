@@ -18,6 +18,7 @@
 
       $this->setVariable('id',$conf['id']);
       $this->setVariable('description',$conf['description']);
+      $this->setVariable('kind',$conf['kind']);
       $this->setVariable('battery_life',$conf['battery_life']);
     }
   }

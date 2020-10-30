@@ -221,9 +221,10 @@
       $result = array();
       if (array_key_exists('doorbots',$json))
       {
+        $result['doorbots'] = array();
         foreach($json['doorbots'] as $doorbot)
         {
-          $result[] = new krcpaDoorbot($this,$doorbot);
+          $result['doorbots'][] = new krcpaDoorbot($this,$doorbot);
         }
       }
       return $result;
