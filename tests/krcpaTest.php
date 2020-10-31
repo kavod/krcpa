@@ -150,7 +150,7 @@ final class krcpaTest extends TestCase
       $this->assertArrayHasKey('doorbots',$devices);
       foreach($devices['doorbots'] as $device)
       {
-        $this->assertEquals($device,$client->getDeviceById($device->getVariable('device_id')));
+        $this->assertEquals($device,$client->getDeviceById($device->getVariable('id')));
         $this->assertNull($client->getDeviceById('niouf'));
       }
     }

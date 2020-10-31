@@ -162,20 +162,30 @@
       return KRCPA_VERSION;
     }
 
-    public function getDeviceById($deviceId)
+    public function getDeviceByAttr($attr,$value)
     {
       $devices = $this->getDevices();
       if (array_key_exists('doorbots',$devices))
       {
         foreach($devices['doorbots'] as $device)
         {
-          if ($device->getVariable('device_id','')==$deviceId)
+          if ($device->getVariable($attr,'')==$value)
             return $device;
         }
         return null;
       } else {
         return null;
       }
+    }
+
+    public function getDeviceById($value)
+    {
+      return $this->getDeviceByAttr('id',$value);
+    }
+
+    public function getDeviceByDeviceId($value)
+    {
+      return $this->getDeviceByAttr('device_id',$value);
     }
 
 
