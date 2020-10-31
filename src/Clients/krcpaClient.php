@@ -50,17 +50,21 @@
         }
     }
 
-    public function auth_password(): array
+    public function auth_password(): bool
     {
       return $this->auth('password');
     }
 
-    public function auth_refresh(): array
+    public function auth_refresh($token = null): bool
     {
+      if (!is_null($token))
+      {
+        $this->setVariable('refresh_token',$token);
+      }
       return $this->auth('refresh_token');
     }
 
-    public function auth($grant_type): array
+    public function auth($grant_type): bool
     {
       $opts = self::$CURL_OPTS;
       $postfields = array(
@@ -123,8 +127,11 @@
       {
         $this->setVariable('token',$json['token_type'].' '.$json['access_token']);
         $this->setVariable('refresh_token',$json['refresh_token']);
+      } else {
+        return false;
       }
-      return $json;
+      //return $json;
+      return true;
     }
 
     public function toString()
@@ -153,6 +160,22 @@
 
     public static function getVersion() {
       return KRCPA_VERSION;
+    }
+
+    public function getDeviceById($deviceId)
+    {
+      $devices = $this->getDevices();
+      if (array_key_exists('doorbots',$devices))
+      {
+        foreach($devices['doorbots'] as $device)
+        {
+          if ($device->getVariable('device_id','')==$deviceId)
+            return $device;
+        }
+        return null;
+      } else {
+        return null;
+      }
     }
 
 
@@ -211,7 +234,14 @@
       {
         return false;
       } else {
-        return (count($this->getDevices())>0);
+        $devices = $this->getDevices();
+        if (array_key_exists('doorbots',$devices))
+        {
+          return (count($devices['doorbots'])>0);
+        } else {
+          return false;
+        }
+
       }
     }
 

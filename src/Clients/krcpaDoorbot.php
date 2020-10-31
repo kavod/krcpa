@@ -17,9 +17,21 @@
       $config = array_merge(array(),$conf);
 
       $this->setVariable('id',$conf['id']);
+      $this->setVariable('device_id',$conf['device_id']);
       $this->setVariable('description',$conf['description']);
       $this->setVariable('kind',$conf['kind']);
       $this->setVariable('battery_life',$conf['battery_life']);
+      $this->setVariable('features',$conf['features']);
+    }
+
+    public function is_featured($feature)
+    {
+      $features = $this->getVariable('features',array());
+      if (array_key_exists($feature,$features))
+      {
+        return $features[$feature];
+      }
+      return false;
     }
   }
  ?>

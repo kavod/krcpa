@@ -23,7 +23,7 @@ final class krcpaTest extends TestCase
       // $dev = new kavod\Clients\krcpaDoorbot(self::$ref_client,self::$conf);
     }
 
-    public function instance($config = array()): KRCPA\Clients\krcpaClient
+    public function instance(): KRCPA\Clients\krcpaClient
     {
       $client = clone self::$ref_client;
       return $client;
@@ -31,7 +31,7 @@ final class krcpaTest extends TestCase
 
     public function testInstance(): void
     {
-        $client = $this::instance(self::$conf);
+        $client = $this::instance();
         $this->assertInstanceOf(
             \KRCPA\Clients\krcpaClient::class,
             $client
@@ -40,14 +40,14 @@ final class krcpaTest extends TestCase
 
     public function testAuth(): void
     {
-        $client = $this::instance(self::$conf);
+        $client = $this::instance();
         $this->assertNotFalse($client->auth_refresh());
         $this->assertNotFalse($client->getVariable('token',false));
     }
 
     public function testGetDevices(): void
     {
-        $client = $this::instance(self::$conf);
+        $client = $this::instance();
         $client->auth_refresh();
         $devices = $client->getDevices();
         $this->assertIsArray($devices);
@@ -60,7 +60,7 @@ final class krcpaTest extends TestCase
 
     public function testGetHistory(): void
     {
-        $client = $this::instance(self::$conf);
+        $client = $this::instance();
         $client->auth_refresh();
         $history = $client->getHistory();
         $this->assertIsArray($history);
@@ -73,7 +73,7 @@ final class krcpaTest extends TestCase
 
     public function testGetActiveDings(): void
     {
-        $client = $this::instance(self::$conf);
+        $client = $this::instance();
         $client->auth_refresh();
         $dings = $client->getActiveDings();
         $this->assertIsArray($dings);
@@ -86,7 +86,7 @@ final class krcpaTest extends TestCase
 
     public function testGetVersion():void
     {
-      $client = $this::instance(self::$conf);
+      $client = $this::instance();
       $client->auth_refresh();
       $this->assertStringContainsString('.',$client->getVersion());
     }
@@ -94,10 +94,11 @@ final class krcpaTest extends TestCase
     public function testAutoReconnect():void
     {
       //$conf = array_merge(array(),self::$conf); # Copy by val
-      $client = $this::instance(self::$conf);
+      $client = $this::instance();
       $client->auth_refresh();
       $client->setVariable('token','Bearer Niouf');
       $devices = $client->getDevices();
+      $this->assertArrayHasKey('doorbots',$devices);
       foreach($devices['doorbots'] as $device)
       {
         $this->assertInstanceOf(KRCPA\Clients\krcpaDoorbot::class,$device);
@@ -107,15 +108,51 @@ final class krcpaTest extends TestCase
 
     public function testAvoidInfiniteLoop():void
     {
-      //$conf = array_merge(array(),self::$conf); # Copy by val
-      $client = $this::instance(self::$conf);
+      $client = new KRCPA\Clients\krcpaClient();
       $client->auth_refresh();
       $client->setVariable('token','Bearer Niouf');
       $client->setVariable('refresh_token','Niorf');
       $devices = $client->getDevices();
       $this->assertIsArray($devices);
-      $this->assertcount(0,$devices);
+      $this->assertArrayHasKey('doorbots',$devices);
+      $this->assertcount(0,$devices['doorbots']);
     }
 
+    public function testIsAuth(): void
+    {
+      $client = new KRCPA\Clients\krcpaClient();
+      $this->assertFalse($client->isAuth());
+      $client->auth_refresh('niouf');
+      $this->assertFalse($client->isAuth());
+      $client->auth_refresh(self::$conf['refresh_token']);
+      $this->assertTrue($client->isAuth());
+    }
+
+    public function testIs_featured(): void
+    {
+      $client = new KRCPA\Clients\krcpaClient();
+      $client->auth_refresh(self::$conf['refresh_token']);
+      $devices = $client->getDevices();
+      $this->assertArrayHasKey('doorbots',$devices);
+      foreach($devices['doorbots'] as $device)
+      {
+        $this->assertTrue($device->is_featured('motions_enabled'));
+        $this->assertFalse($device->is_featured('show_offline_motion_events'));
+        $this->assertFalse($device->is_featured('niouf'));
+      }
+    }
+
+    public function testGetDeviceById(): void
+    {
+      $client = new KRCPA\Clients\krcpaClient();
+      $client->auth_refresh(self::$conf['refresh_token']);
+      $devices = $client->getDevices();
+      $this->assertArrayHasKey('doorbots',$devices);
+      foreach($devices['doorbots'] as $device)
+      {
+        $this->assertEquals($device,$client->getDeviceById($device->getVariable('device_id')));
+        $this->assertNull($client->getDeviceById('niouf'));
+      }
+    }
 }
 ?>
