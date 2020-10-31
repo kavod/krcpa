@@ -139,56 +139,6 @@
       return json_encode($this->conf);
     }
 
-    // Getters
-    /**
-     * Returns a persistent variable.
-     *
-     * To avoid problems, always use lower case for persistent variable names.
-     *
-     * @param $name
-     *   The name of the variable to return.
-     * @param $default
-     *   The default value to use if this variable has never been set.
-     *
-     * @return
-     *   The value of the variable.
-     */
-    public function getVariable($name, $default = NULL)
-    {
-        return array_key_exists($name,$this->conf) ? $this->conf[$name] : $default;
-    }
-
-    public static function getVersion() {
-      return KRCPA_VERSION;
-    }
-
-    public function getDeviceByAttr($attr,$value)
-    {
-      $devices = $this->getDevices();
-      if (array_key_exists('doorbots',$devices))
-      {
-        foreach($devices['doorbots'] as $device)
-        {
-          if ($device->getVariable($attr,'')==$value)
-            return $device;
-        }
-        return null;
-      } else {
-        return null;
-      }
-    }
-
-    public function getDeviceById($value)
-    {
-      return $this->getDeviceByAttr('id',$value);
-    }
-
-    public function getDeviceByDeviceId($value)
-    {
-      return $this->getDeviceByAttr('device_id',$value);
-    }
-
-
     public function query($service,$retry=true): array
     {
       $ch = curl_init();
@@ -253,6 +203,55 @@
         }
 
       }
+    }
+
+    // Getters
+    /**
+     * Returns a persistent variable.
+     *
+     * To avoid problems, always use lower case for persistent variable names.
+     *
+     * @param $name
+     *   The name of the variable to return.
+     * @param $default
+     *   The default value to use if this variable has never been set.
+     *
+     * @return
+     *   The value of the variable.
+     */
+    public function getVariable($name, $default = NULL)
+    {
+        return array_key_exists($name,$this->conf) ? $this->conf[$name] : $default;
+    }
+
+    public static function getVersion() {
+      return KRCPA_VERSION;
+    }
+
+    public function getDeviceByAttr($attr,$value)
+    {
+      $devices = $this->getDevices();
+      if (array_key_exists('doorbots',$devices))
+      {
+        foreach($devices['doorbots'] as $device)
+        {
+          if ($device->getVariable($attr,'')==$value)
+            return $device;
+        }
+        return null;
+      } else {
+        return null;
+      }
+    }
+
+    public function getDeviceById($value)
+    {
+      return $this->getDeviceByAttr('id',$value);
+    }
+
+    public function getDeviceByDeviceId($value)
+    {
+      return $this->getDeviceByAttr('device_id',$value);
     }
 
     public function getDevices()
