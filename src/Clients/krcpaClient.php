@@ -218,10 +218,11 @@
     public function getDevices()
     {
       $json = $this->query('ring_devices');
-      $result = array();
+      $result = array(
+        "doorbots" => array()
+      );
       if (array_key_exists('doorbots',$json))
       {
-        $result['doorbots'] = array();
         foreach($json['doorbots'] as $doorbot)
         {
           $result['doorbots'][] = new krcpaDoorbot($this,$doorbot);
