@@ -111,10 +111,27 @@ final class krcpaTest extends TestCase
       }
     }
 
-    public function testAvoidInfiniteLoop():void
+    public function testAvoidInfiniteLoop1():void
     {
+      $this->expectException(KRCPA\Exceptions\krcpaClassException::class);
+      $this->expectExceptionCode(3);
+
       $client = new KRCPA\Clients\krcpaClient();
       $client->auth_refresh();
+      $client->setVariable('token','Bearer Niouf');
+      $client->setVariable('refresh_token','Niorf');
+      $devices = $client->getDevices();
+      $this->assertIsArray($devices);
+      $this->assertArrayHasKey('doorbots',$devices);
+      $this->assertcount(0,$devices['doorbots']);
+    }
+
+    public function testAvoidInfiniteLoop2():void
+    {
+      $this->expectException(KRCPA\Exceptions\krcpaClassException::class);
+      $this->expectExceptionCode(5);
+
+      $client = new KRCPA\Clients\krcpaClient();
       $client->setVariable('token','Bearer Niouf');
       $client->setVariable('refresh_token','Niorf');
       $devices = $client->getDevices();
@@ -127,7 +144,12 @@ final class krcpaTest extends TestCase
     {
       $client = new KRCPA\Clients\krcpaClient();
       $this->assertFalse($client->isAuth());
-      $client->auth_refresh('niouf');
+      try {
+        $client->auth_refresh('niouf');
+      } catch (\Exception $e)
+      {
+
+      }
       $this->assertFalse($client->isAuth());
       $client->auth_refresh(self::$conf['refresh_token']);
       $this->assertTrue($client->isAuth());
@@ -157,6 +179,31 @@ final class krcpaTest extends TestCase
       {
         $this->assertEquals($device,$client->getDeviceById($device->getVariable('id')));
         $this->assertNull($client->getDeviceById('niouf'));
+      }
+    }
+
+    public function testGetDoNotDisturb(): void
+    {
+      $time = 300;
+      $tol = 1;
+
+      $client = new KRCPA\Clients\krcpaClient();
+      $client->auth_refresh(self::$conf['refresh_token']);
+      $devices = $client->getDevices();
+      foreach($devices['chimes'] as $device)
+      {
+        $this->assertInstanceOf(KRCPA\Clients\krcpaChime::class,$device);
+        $time1 = $device->setDoNotDisturb($time);
+        $this->assertIsNumeric($time1);
+        $this->assertEquals($time1,$time);
+        $time2 = $device->getDoNotDisturb();
+        $this->assertIsNumeric($time2);
+        $this->assertLessThanOrEqual($time2,$time);
+        $this->assertGreaterThanOrEqual($time2-$tol,$time);
+        $time3 = $device->setDoNotDisturb(0);
+        $this->assertEquals($time3,0);
+        $time4 = $device->getDoNotDisturb();
+        $this->assertEquals($time4,0);
       }
     }
 }

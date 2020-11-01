@@ -1,10 +1,10 @@
 <?php
 namespace KRCPA\Exceptions;
-class krcpaCurlException
+class krcpaCurlException extends \Exception
 {
-    function __construct($code, $message)
-    {
-
-    }
+  function __construct($message,$code)
+  {
+    parent::__construct($message, $code);
+  }
 }
 ?>

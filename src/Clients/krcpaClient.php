@@ -4,6 +4,8 @@
  *
  */
   namespace KRCPA\Clients;
+  use KRCPA\Exceptions\krcpaApiException;
+  use KRCPA\Exceptions\krcpaClassException;
 
   define('KRCPA_VERSION',"0.1");
   define('KRCPA_API_URL', "https://api.ring.com/clients_api/");
@@ -55,7 +57,7 @@
       return $this->auth('password');
     }
 
-    public function auth_refresh($token = null): bool
+    public function auth_refresh($token = null): array
     {
       if (!is_null($token))
       {
@@ -64,7 +66,7 @@
       return $this->auth('refresh_token');
     }
 
-    public function auth($grant_type): bool
+    public function auth($grant_type): array
     {
       $opts = self::$CURL_OPTS;
       $postfields = array(
@@ -77,10 +79,14 @@
         case 'password':
           if ($this->getVariable('username',-1)==-1)
           {
+            // Username not provided
+            throw new krcpaClassException('',$code=1);
             return false;
           }
           if ($this->getVariable('password',-1)==-1)
           {
+            // Password not provided
+            throw new krcpaClassException('',$code=2);
             return false;
           }
           $postfields['username'] = $this->getVariable('username','');
@@ -90,12 +96,16 @@
         case 'refresh_token':
           if ($this->getVariable('refresh_token',-1)==-1)
           {
+            // Refresh Token not provided
+            throw new krcpaClassException('',$code=3);
             return false;
           }
           $postfields['refresh_token'] = $this->getVariable('refresh_token','');
           break;
 
         default:
+          // Grant type %s not supported
+          throw new krcpaClassException($code=4,$v1=$grant_type);
           return false;
           break;
       }
@@ -113,12 +123,13 @@
       curl_setopt_array($ch, $opts);
       $result = curl_exec($ch);
       $errno = curl_errno($ch);
+      $error = curl_error($ch);
       curl_close($ch);
       // print_r($result);
 
       if ($result === false)
       {
-        return false;
+        throw new krcpaCurlException($error,$errno);
       }
       list($headers, $body) = explode("\r\n\r\n", $result);
       $json = json_decode($body,true);
@@ -128,10 +139,12 @@
         $this->setVariable('token',$json['token_type'].' '.$json['access_token']);
         $this->setVariable('refresh_token',$json['refresh_token']);
       } else {
+        // Refresh Token missing in auth response: %s
+        throw new krcpaClassException('',$code=5,$v1=print_r($result,true));
         return false;
       }
       //return $json;
-      return true;
+      return $json;
     }
 
     public function toString()
@@ -139,18 +152,28 @@
       return json_encode($this->conf);
     }
 
-    public function query($service,$retry=true): array
+    public function query($service,$method='GET',$postfields=array(),$retry=true): array
     {
       $ch = curl_init();
       $opts = self::$CURL_OPTS;
-      $opts[CURLOPT_HTTPGET] = true;
+      if ($method=='GET')
+        $opts[CURLOPT_HTTPGET] = true;
       $querystring = '?api_version='.KRCPA_API_VERSION;
       $opts[CURLOPT_URL] = KRCPA_API_URL . $service . $querystring;
       $opts[CURLOPT_HTTPHEADER] = array();
       $opts[CURLOPT_HTTPHEADER][] = "content-type: application/x-www-form-urlencoded";
       $opts[CURLOPT_HTTPHEADER][] = "Authorization: " . $this->getVariable('token','');
       $opts[CURLOPT_HTTPHEADER][] = "User-agent: " . KRCPA_USER_AGENT;
-      //print_r($opts);
+      $str_postfields = '';
+      foreach ($postfields as $key => $value) {
+        if ($str_postfields != '')
+          $str_postfields .= '&';
+        $str_postfields .= urlencode($key).'='.urlencode($value);
+      }
+      if ($str_postfields!='')
+        $opts[CURLOPT_POSTFIELDS] = $str_postfields;
+
+      // print_r($opts);
       curl_setopt_array($ch, $opts);
       $result = curl_exec($ch);
       $errno = curl_errno($ch);
@@ -194,7 +217,12 @@
       {
         return false;
       } else {
-        $devices = $this->getDevices();
+        try{
+          $devices = $this->getDevices();
+        } catch(krcpaClassException $e)
+        {
+          return false;
+        }
         if (array_key_exists('doorbots',$devices))
         {
           return (count($devices['doorbots'])>0);

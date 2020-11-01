@@ -14,7 +14,7 @@
     {
       $this->client = $client;
 
-      $config = array_merge(array(),$conf);
+      $this->conf = array_merge(array(),$client->conf);
 
       $this->setVariable('id',$conf['id']);
       $this->setVariable('device_id',$conf['device_id']);
