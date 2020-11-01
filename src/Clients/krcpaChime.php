@@ -5,7 +5,7 @@
  */
   namespace KRCPA\Clients;
 
-  class krcpaDoorbot extends krcpaDevice
+  class krcpaChime extends krcpaDevice
   {
     public $conf = array();
     protected $client;
@@ -15,15 +15,14 @@
       parent::__construct($client,$conf);
 
       // Battery
-      $this->conf['battery'] = true;
-      $this->setVariable('battery_life',$conf['battery_life']);
+      $this->conf['features']['battery'] = false;
 
       // Ring
       $this->conf['features']['ring'] = true;
 
       // Volume
       $this->conf['features']['volume'] = true;
-      $this->setVariable('volume',$conf['settings']['doorbell_volume']);
+      $this->setVariable('volume',$conf['settings']['volume']);
     }
   }
  ?>

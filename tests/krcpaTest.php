@@ -56,6 +56,11 @@ final class krcpaTest extends TestCase
           $this->assertInstanceOf(KRCPA\Clients\krcpaDoorbot::class,$device);
           $this->assertIsNumeric($device->getVariable('battery_life'));
         }
+        foreach($devices['chimes'] as $device)
+        {
+          $this->assertInstanceOf(KRCPA\Clients\krcpaChime::class,$device);
+          $this->assertIsNumeric($device->getVariable('volume'));
+        }
     }
 
     public function testGetHistory(): void

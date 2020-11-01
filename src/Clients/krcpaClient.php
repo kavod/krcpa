@@ -258,13 +258,21 @@
     {
       $json = $this->query('ring_devices');
       $result = array(
-        "doorbots" => array()
+        "doorbots" => array(),
+        "chimes" => array()
       );
       if (array_key_exists('doorbots',$json))
       {
         foreach($json['doorbots'] as $doorbot)
         {
           $result['doorbots'][] = new krcpaDoorbot($this,$doorbot);
+        }
+      }
+      if (array_key_exists('chimes',$json))
+      {
+        foreach($json['chimes'] as $chime)
+        {
+          $result['chimes'][] = new krcpaChime($this,$chime);
         }
       }
       return $result;
