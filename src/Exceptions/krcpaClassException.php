@@ -9,7 +9,8 @@ class krcpaClassException extends krcpaException
     2 => 'Password not provided',
     3 => 'Refresh Token not provided',
     4 => "Grant type %s not supported",
-    5 => 'Refresh Token missing in auth response: %s'
+    5 => 'Refresh Token missing in auth response: %s',
+    6 => 'Unknown device: %s => %s'
   );
   function __construct($message='',$code=0,$v1='',$v2='')
   {

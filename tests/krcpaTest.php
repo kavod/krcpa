@@ -190,8 +190,17 @@ final class krcpaTest extends TestCase
       foreach($devices['doorbots'] as $device)
       {
         $this->assertEquals($device,$client->getDeviceById($device->getVariable('id')));
-        $this->assertNull($client->getDeviceById('niouf'));
       }
+    }
+
+    public function testGetDeviceByIdNotFound(): void
+    {
+      $this->expectException(KRCPA\Exceptions\krcpaClassException::class);
+      $this->expectExceptionCode(6);
+
+      $client = new KRCPA\Clients\krcpaClient();
+      $client->auth_refresh(self::$conf['refresh_token']);
+      $device = $client->getDeviceById('niouf');
     }
 
     public function testGetDoNotDisturb(): void

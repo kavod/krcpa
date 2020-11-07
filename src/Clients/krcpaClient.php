@@ -274,10 +274,17 @@
           if ($device->getVariable($attr,'')==$value)
             return $device;
         }
-        return null;
-      } else {
-        return null;
       }
+      if (array_key_exists('chimes',$devices))
+      {
+        foreach($devices['chimes'] as $device)
+        {
+          if ($device->getVariable($attr,'')==$value)
+            return $device;
+        }
+      }
+      throw new krcpaClassException('',6,$attr,$value);
+      return null;
     }
 
     public function getDeviceById($value)
