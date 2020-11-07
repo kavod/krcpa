@@ -124,6 +124,7 @@
       $result = curl_exec($ch);
       $errno = curl_errno($ch);
       $error = curl_error($ch);
+      $http_code = curl_getinfo($ch,CURLINFO_HTTP_CODE);
       curl_close($ch);
       // print_r($result);
 
@@ -134,17 +135,24 @@
       list($headers, $body) = explode("\r\n\r\n", $result);
       $json = json_decode($body,true);
       //print_r($json);
-      if (array_key_exists('access_token',$json))
+      if ($http_code == 200)
       {
-        $this->setVariable('token',$json['token_type'].' '.$json['access_token']);
-        $this->setVariable('refresh_token',$json['refresh_token']);
+        if (array_key_exists('access_token',$json))
+        {
+          $this->setVariable('token',$json['token_type'].' '.$json['access_token']);
+          $this->setVariable('refresh_token',$json['refresh_token']);
+        } else {
+          // Refresh Token missing in auth response: %s
+          throw new krcpaClassException('',$code=5,$v1=print_r($body,true));
+          return false;
+        }
+        //return $json;
+        return $json;
       } else {
-        // Refresh Token missing in auth response: %s
-        throw new krcpaClassException('',$code=5,$v1=print_r($result,true));
-        return false;
+        $message = (array_key_exists('error_description',$json)) ? $json['error_description'] : '';
+        throw new krcpaApiException('',$http_code,$json);
       }
-      //return $json;
-      return $json;
+
     }
 
     public function toString()
@@ -219,7 +227,7 @@
       } else {
         try{
           $devices = $this->getDevices();
-        } catch(krcpaClassException $e)
+        } catch(krcpaApiException $e)
         {
           return false;
         }

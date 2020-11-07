@@ -1,6 +1,6 @@
 <?php
 namespace KRCPA\Exceptions;
-class krcpaClassException extends \Exception
+class krcpaClassException extends krcpaException
 {
   public $v1;
   public $v2;

@@ -1,6 +1,6 @@
 <?php
 namespace KRCPA\Exceptions;
-class krcpaCurlException extends krcpaException
+class krcpaException extends \Exception
 {
   function __construct($message,$code)
   {
@@ -9,7 +9,7 @@ class krcpaCurlException extends krcpaException
 
   function code_description()
   {
-    return curl_strerror($this->code);
+    return $this->message;
   }
 }
 ?>

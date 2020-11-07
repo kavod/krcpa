@@ -128,8 +128,8 @@ final class krcpaTest extends TestCase
 
     public function testAvoidInfiniteLoop2():void
     {
-      $this->expectException(KRCPA\Exceptions\krcpaClassException::class);
-      $this->expectExceptionCode(5);
+      $this->expectException(KRCPA\Exceptions\krcpaApiException::class);
+      $this->expectExceptionCode(401);
 
       $client = new KRCPA\Clients\krcpaClient();
       $client->setVariable('token','Bearer Niouf');
@@ -138,6 +138,18 @@ final class krcpaTest extends TestCase
       $this->assertIsArray($devices);
       $this->assertArrayHasKey('doorbots',$devices);
       $this->assertcount(0,$devices['doorbots']);
+    }
+
+    public function testCodeDescription():void
+    {
+      $client = new KRCPA\Clients\krcpaClient();
+      $client->setVariable('token','Bearer Niouf');
+      $client->setVariable('refresh_token','Niorf');
+      try {
+        $devices = $client->getDevices();
+      } catch (KRCPA\Exceptions\krcpaApiException $e) {
+        $this->assertEquals($e->code_description(),'Unauthorized');
+      }
     }
 
     public function testIsAuth(): void
