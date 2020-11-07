@@ -52,7 +52,7 @@
         }
     }
 
-    public function auth_password(): bool
+    public function auth_password(): array
     {
       return $this->auth('password');
     }
