@@ -150,7 +150,7 @@
         return $json;
       } else {
         $message = (array_key_exists('error_description',$json)) ? $json['error_description'] : '';
-        throw new krcpaApiException('',$http_code,$json);
+        throw new krcpaApiException($message,$http_code,$json);
       }
 
     }
