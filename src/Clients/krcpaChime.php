@@ -18,7 +18,7 @@
       $this->conf['features']['battery'] = false;
 
       // Ring
-      $this->conf['features']['ring'] = true;
+      $this->conf['features']['ring'] = false;
 
       // Do not Disturb
       $this->conf['features']['dnd'] = true;
