@@ -28,6 +28,18 @@
       $this->setVariable('volume',$conf['settings']['volume']);
     }
 
+    public function update_conf($config = array())
+    {
+      parent::update_conf($config);
+      if (array_key_exists('settings',$config))
+      {
+        if (array_key_exists('volume',$config['settings']))
+        {
+          $this->setVariable('volume',$config['settings']['volume']);
+        }
+      }
+    }
+
     public function getDoNotDisturb()
     {
       $json = $this->query('chimes/'.$this->getVariable('id').'/do_not_disturb');
@@ -47,6 +59,20 @@
         return $json['time_remaining'];
       }
       return false;
+    }
+
+    public function getVolume()
+    {
+      return $this->getVariable('volume',-1);
+    }
+
+    public function setVolume($vol)
+    {
+      $vol = intval($vol);
+      $postfields = array('chime'=>array("settings"=>array("volume"=>$vol)));
+      $json = $this->query('chimes/'.$this->getVariable('id'),$method='PUT',$postfields=$postfields);
+      $this->setVariable('volume',$vol);
+      return true;
     }
   }
  ?>

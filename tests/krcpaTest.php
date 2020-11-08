@@ -227,5 +227,21 @@ final class krcpaTest extends TestCase
         $this->assertEquals($time4,0);
       }
     }
+
+    public function testVolume(): void
+    {
+      $client = new KRCPA\Clients\krcpaClient();
+      $client->auth_refresh(self::$conf['refresh_token']);
+      $devices = $client->getDevices();
+      foreach($devices['chimes'] as $device)
+      {
+        $device->setVolume(5);
+        $device->resync();
+        $this->assertEquals($device->getVolume(),5);
+        $device->setVolume(4);
+        $device->resync();
+        $this->assertEquals($device->getVolume(),4);
+      }
+    }
 }
 ?>

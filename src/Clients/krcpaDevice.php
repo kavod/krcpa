@@ -32,5 +32,10 @@
       }
       return false;
     }
+
+    public function resync()
+    {
+      $this->client->getDevices($resync=true);
+    }
   }
  ?>

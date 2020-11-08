@@ -17,6 +17,7 @@
   {
     public $conf = array();
     protected $token;
+    public $_devices = array();
 
     /**
     * Default options for cURL.
@@ -45,11 +46,16 @@
     {
         $config = array_merge(array(),$conf);
 
-        // Other else configurations.
-        foreach ($config as $name => $value)
-        {
-            $this->setVariable($name, $value);
-        }
+        $this->update_conf($config);
+    }
+
+    public function update_conf($config = array())
+    {
+      // Other else configurations.
+      foreach ($config as $name => $value)
+      {
+          $this->setVariable($name, $value);
+      }
     }
 
     public function auth_password(): array
@@ -135,7 +141,7 @@
       list($headers, $body) = explode("\r\n\r\n", $result);
       $json = json_decode($body,true);
       //print_r($json);
-      if ($http_code == 200)
+      if (substr($http_code,0,1) == '2')
       {
         if (array_key_exists('access_token',$json))
         {
@@ -166,20 +172,25 @@
       $opts = self::$CURL_OPTS;
       if ($method=='GET')
         $opts[CURLOPT_HTTPGET] = true;
+      elseif($method=='PUT')
+        $opts[CURLOPT_CUSTOMREQUEST] = "PUT";
       $querystring = '?api_version='.KRCPA_API_VERSION;
       $opts[CURLOPT_URL] = KRCPA_API_URL . $service . $querystring;
       $opts[CURLOPT_HTTPHEADER] = array();
-      $opts[CURLOPT_HTTPHEADER][] = "content-type: application/x-www-form-urlencoded";
+      //$opts[CURLOPT_HTTPHEADER][] = "content-type: application/x-www-form-urlencoded";
+	    $opts[CURLOPT_HTTPHEADER][] = "content-type: application/json; charset=utf-8";
       $opts[CURLOPT_HTTPHEADER][] = "Authorization: " . $this->getVariable('token','');
       $opts[CURLOPT_HTTPHEADER][] = "User-agent: " . KRCPA_USER_AGENT;
-      $str_postfields = '';
-      foreach ($postfields as $key => $value) {
-        if ($str_postfields != '')
-          $str_postfields .= '&';
-        $str_postfields .= urlencode($key).'='.urlencode($value);
-      }
-      if ($str_postfields!='')
-        $opts[CURLOPT_POSTFIELDS] = $str_postfields;
+      // $str_postfields = '';
+      // foreach ($postfields as $key => $value) {
+      //   if ($str_postfields != '')
+      //     $str_postfields .= '&';
+      //   $str_postfields .= urlencode($key).'='.urlencode($value);
+      // }
+      // if ($str_postfields!='')
+      //   $opts[CURLOPT_POSTFIELDS] = $str_postfields;
+      if ($postfields!=array())
+        $opts[CURLOPT_POSTFIELDS] = json_encode($postfields);
 
       // print_r($opts);
       curl_setopt_array($ch, $opts);
@@ -189,9 +200,18 @@
       curl_close($ch);
       // print_r($result);
       // print_r($errno);
+      if ($result === false)
+      {
+        return false;
+      }
+      list($headers, $body) = explode("\r\n\r\n", $result);
+      $json = json_decode($body,true);
+      if ($json == null)
+        $json = array();
       if (!$errno) {
         switch ($http_code) {
           case 200:  # OK
+          case 204:  # OK - No content
             break;
           case 401: # Unauthorized
             if ($retry)
@@ -204,16 +224,13 @@
               return array();
             }
           default:
-            echo 'Unexpected HTTP code: ', $http_code, "\n";
+            $message = (array_key_exists('error_description',$json)) ? $json['error_description'] : '';
+            throw new krcpaApiException($message,$http_code,$json);
+            //echo 'Unexpected HTTP code: ', $http_code, "\n";
             return array();
         }
       }
-      if ($result === false)
-      {
-        return false;
-      }
-      list($headers, $body) = explode("\r\n\r\n", $result);
-      $json = json_decode($body,true);
+
       // print_r($json);
 
       return $json;
@@ -264,19 +281,21 @@
       return KRCPA_VERSION;
     }
 
-    public function getDeviceByAttr($attr,$value)
+    public function getDeviceByAttr($attr,$value,$resync=false)
     {
-      $devices = $this->getDevices();
-      if (array_key_exists('doorbots',$devices))
+      foreach($this->_devices as $device)
       {
+        if ($device->getVariable($attr,'')==$value)
+          return $device;
+      }
+      if (count($this->_devices)==0 || $resync)
+      {
+        $devices = $this->getDevices($resync=true);
         foreach($devices['doorbots'] as $device)
         {
           if ($device->getVariable($attr,'')==$value)
             return $device;
         }
-      }
-      if (array_key_exists('chimes',$devices))
-      {
         foreach($devices['chimes'] as $device)
         {
           if ($device->getVariable($attr,'')==$value)
@@ -285,40 +304,94 @@
       }
       throw new krcpaClassException('',6,$attr,$value);
       return null;
+
+      // $devices = $this->getDevices();
+      // if (array_key_exists('doorbots',$devices))
+      // {
+      //   foreach($devices['doorbots'] as $device)
+      //   {
+      //     if ($device->getVariable($attr,'')==$value)
+      //       return $device;
+      //   }
+      // }
+      // if (array_key_exists('chimes',$devices))
+      // {
+      //   foreach($devices['chimes'] as $device)
+      //   {
+      //     if ($device->getVariable($attr,'')==$value)
+      //       return $device;
+      //   }
+      // }
+      // throw new krcpaClassException('',6,$attr,$value);
+      // return null;
     }
 
-    public function getDeviceById($value)
+    public function getDeviceById($value,$resync=false)
     {
-      return $this->getDeviceByAttr('id',$value);
+      return $this->getDeviceByAttr('id',$value,$resync=$resync);
     }
 
-    public function getDeviceByDeviceId($value)
+    public function getDeviceByDeviceId($value,$resync=false)
     {
-      return $this->getDeviceByAttr('device_id',$value);
+      return $this->getDeviceByAttr('device_id',$value,$resync=$resync);
     }
 
-    public function getDevices()
+    public function getDevices($resync=false)
     {
-      $json = $this->query('ring_devices');
-      $result = array(
-        "doorbots" => array(),
-        "chimes" => array()
-      );
-      if (array_key_exists('doorbots',$json))
+      if ($resync || count($this->_devices)==0)
       {
-        foreach($json['doorbots'] as $doorbot)
+        $json = $this->query('ring_devices');
+        $result = array(
+          "doorbots" => array(),
+          "chimes" => array()
+        );
+        if (array_key_exists('doorbots',$json))
         {
-          $result['doorbots'][] = new krcpaDoorbot($this,$doorbot);
+          foreach($json['doorbots'] as $doorbot_conf)
+          {
+            if(count($this->_devices)>0)
+            {
+              try {
+                $doorbot = $this->getDeviceById($doorbot_conf['id'],$resync=false);
+                $doorbot->update_conf($doorbot_conf);
+              } catch (krcpaClassException $e)
+              {
+                $doorbot = new krcpaDoorbot($this,$doorbot_conf);
+                $this->_devices[] = $doorbot;
+              }
+            } else {
+              $doorbot = new krcpaDoorbot($this,$doorbot_conf);
+              $this->_devices[] = $doorbot;
+            }
+            $result['doorbots'][] = $doorbot;
+          }
         }
-      }
-      if (array_key_exists('chimes',$json))
-      {
-        foreach($json['chimes'] as $chime)
+        if (array_key_exists('chimes',$json))
         {
-          $result['chimes'][] = new krcpaChime($this,$chime);
+          foreach($json['chimes'] as $chime_conf)
+          {
+            if(count($this->_devices)>0)
+            {
+              try {
+                $chime = $this->getDeviceById($chime_conf['id'],$resync=false);
+                $chime->update_conf($chime_conf);
+              } catch (krcpaClassException $e)
+              {
+                $chime = new krcpaChime($this,$chime_conf);
+                $this->_devices[] = $chime;
+              }
+            } else {
+              $chime = new krcpaChime($this,$chime_conf);
+              $this->_devices[] = $chime;
+            }
+            $result['chimes'][] = $chime;
+          }
         }
+        return $result;
+      } else {
+        return $this->_devices;
       }
-      return $result;
+
     }
 
     public function getHistory():array
