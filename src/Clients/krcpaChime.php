@@ -10,10 +10,8 @@
     public $conf = array();
     protected $client;
 
-    public function __construct($client,$conf = array())
+    public function enhance_features()
     {
-      parent::__construct($client,$conf);
-
       // Battery
       $this->conf['features']['battery'] = false;
 
@@ -25,7 +23,6 @@
 
       // Volume
       $this->conf['features']['volume'] = true;
-      $this->setVariable('volume',$conf['settings']['volume']);
     }
 
     public function update_conf($config = array())
@@ -59,11 +56,6 @@
         return $json['time_remaining'];
       }
       return false;
-    }
-
-    public function getVolume()
-    {
-      return $this->getVariable('volume',-1);
     }
 
     public function setVolume($vol)

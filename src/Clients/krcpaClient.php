@@ -177,18 +177,9 @@
       $querystring = '?api_version='.KRCPA_API_VERSION;
       $opts[CURLOPT_URL] = KRCPA_API_URL . $service . $querystring;
       $opts[CURLOPT_HTTPHEADER] = array();
-      //$opts[CURLOPT_HTTPHEADER][] = "content-type: application/x-www-form-urlencoded";
 	    $opts[CURLOPT_HTTPHEADER][] = "content-type: application/json; charset=utf-8";
       $opts[CURLOPT_HTTPHEADER][] = "Authorization: " . $this->getVariable('token','');
       $opts[CURLOPT_HTTPHEADER][] = "User-agent: " . KRCPA_USER_AGENT;
-      // $str_postfields = '';
-      // foreach ($postfields as $key => $value) {
-      //   if ($str_postfields != '')
-      //     $str_postfields .= '&';
-      //   $str_postfields .= urlencode($key).'='.urlencode($value);
-      // }
-      // if ($str_postfields!='')
-      //   $opts[CURLOPT_POSTFIELDS] = $str_postfields;
       if ($postfields!=array())
         $opts[CURLOPT_POSTFIELDS] = json_encode($postfields);
 
@@ -304,26 +295,6 @@
       }
       throw new krcpaClassException('',6,$attr,$value);
       return null;
-
-      // $devices = $this->getDevices();
-      // if (array_key_exists('doorbots',$devices))
-      // {
-      //   foreach($devices['doorbots'] as $device)
-      //   {
-      //     if ($device->getVariable($attr,'')==$value)
-      //       return $device;
-      //   }
-      // }
-      // if (array_key_exists('chimes',$devices))
-      // {
-      //   foreach($devices['chimes'] as $device)
-      //   {
-      //     if ($device->getVariable($attr,'')==$value)
-      //       return $device;
-      //   }
-      // }
-      // throw new krcpaClassException('',6,$attr,$value);
-      // return null;
     }
 
     public function getDeviceById($value,$resync=false)

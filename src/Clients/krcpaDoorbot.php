@@ -10,20 +10,33 @@
     public $conf = array();
     protected $client;
 
-    public function __construct($client,$conf = array())
+    public function enhance_features()
     {
-      parent::__construct($client,$conf);
-
       // Battery
       $this->conf['battery'] = true;
-      $this->setVariable('battery_life',$conf['battery_life']);
 
       // Ring
       $this->conf['features']['ring'] = true;
 
       // Volume
       $this->conf['features']['volume'] = true;
-      $this->setVariable('volume',$conf['settings']['doorbell_volume']);
+    }
+
+    public function update_conf($config = array())
+    {
+      parent::update_conf($config);
+      if (array_key_exists('settings',$config))
+      {
+        if (array_key_exists('volume',$config['settings']))
+        {
+          $this->setVariable('volume',$config['settings']['doorbell_volume']);
+        }
+      }
+
+      if (array_key_exists('battery_life',$config))
+      {
+        $this->setVariable('battery_life',$config['battery_life']);
+      }
     }
   }
  ?>
