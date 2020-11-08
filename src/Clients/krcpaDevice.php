@@ -15,8 +15,8 @@
       $this->client = $client;
 
       $this->conf = array_merge(array(),$client->conf);
-      $this->enhance_features();
       $this->update_conf($conf);
+      $this->enhance_features();
     }
 
     public function is_featured($feature)
