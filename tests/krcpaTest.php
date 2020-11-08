@@ -242,6 +242,15 @@ final class krcpaTest extends TestCase
         $device->resync();
         $this->assertEquals($device->getVolume(),4);
       }
+      foreach($devices['doorbots'] as $device)
+      {
+        $device->setVolume(5);
+        $device->resync();
+        $this->assertEquals($device->getVolume(),5);
+        $device->setVolume(4);
+        $device->resync();
+        $this->assertEquals($device->getVolume(),4);
+      }
     }
 }
 ?>

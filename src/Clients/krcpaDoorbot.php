@@ -38,5 +38,14 @@
         $this->setVariable('battery_life',$config['battery_life']);
       }
     }
+
+    public function setVolume($vol)
+    {
+      $vol = intval($vol);
+      $postfields = array('doorbot'=>array("settings"=>array("doorbell_volume"=>$vol)));
+      $json = $this->query('doorbots/'.$this->getVariable('id'),$method='PUT',$postfields=$postfields);
+      $this->setVariable('volume',$vol);
+      return true;
+    }
   }
  ?>
