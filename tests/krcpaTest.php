@@ -252,5 +252,20 @@ final class krcpaTest extends TestCase
         $this->assertEquals($device->getVolume(),2);
       }
     }
+
+    public function testLinks(): void
+    {
+      $client = new KRCPA\Clients\krcpaClient();
+      $client->auth_refresh(self::$conf['refresh_token']);
+      $devices = $client->getDevices();
+      foreach($devices['chimes'] as $device)
+      {
+        $doorbells = $device->getLinkedDoorbells();
+        foreach($doorbells as $doorbell)
+        {
+          $this->assertInstanceOf(KRCPA\Clients\krcpaDoorbot::class,$doorbell);
+        }
+      }
+    }
 }
 ?>

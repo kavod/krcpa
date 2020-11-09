@@ -66,5 +66,21 @@
       $this->setVariable('volume',$vol);
       return true;
     }
+
+    public function getLinkedDoorbells()
+    {
+      $result = array();
+      $json = $this->query('chimes/'.$this->getVariable('id').'/linked_doorbots',$method='GET');
+      if (array_key_exists('linked_doorbots',$json))
+      {
+        foreach($json['linked_doorbots'] as $doorbot_conf)
+        {
+          $result[] = $this->client->getDeviceById($doorbot_conf['id']);
+        }
+      } else {
+        throw new krcpaClassException('',7,json_encode($json));
+      }
+      return $result;
+    }
   }
  ?>
