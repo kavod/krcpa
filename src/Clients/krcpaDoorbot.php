@@ -27,7 +27,7 @@
       parent::update_conf($config);
       if (array_key_exists('settings',$config))
       {
-        if (array_key_exists('volume',$config['settings']))
+        if (array_key_exists('doorbell_volume',$config['settings']))
         {
           $this->setVariable('volume',$config['settings']['doorbell_volume']);
         }
