@@ -82,5 +82,12 @@
       }
       return $result;
     }
+
+    public function playSound($kind='ding')
+    {
+      $postfields = array('chime'=>array("kind"=>$kind));
+      $json = $this->query('chimes/'.$this->getVariable('id').'/play_sound',$method='POST',$postfields=$postfields);
+      return true;
+    }
   }
  ?>

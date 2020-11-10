@@ -267,5 +267,20 @@ final class krcpaTest extends TestCase
         }
       }
     }
+
+    public function testPlaySound(): void
+    {
+      $client = new KRCPA\Clients\krcpaClient();
+      $client->auth_refresh(self::$conf['refresh_token']);
+      $devices = $client->getDevices();
+      foreach($devices['chimes'] as $device)
+      {
+        $vol = $device->getVolume();
+        $device->setVolume(0);
+        sleep(1);
+        $this->assertTrue($device->playSound());
+        $device->setVolume($vol);
+      }
+    }
 }
 ?>
