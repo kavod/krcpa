@@ -266,6 +266,14 @@ final class krcpaTest extends TestCase
           $this->assertInstanceOf(KRCPA\Clients\krcpaDoorbot::class,$doorbell);
         }
       }
+      foreach($devices['doorbots'] as $device)
+      {
+        $chimes = $device->getLinkedChimes();
+        foreach($chimes as $chime)
+        {
+          $this->assertInstanceOf(KRCPA\Clients\krcpaChime::class,$chime);
+        }
+      }
     }
 
     public function testPlaySound(): void

@@ -94,5 +94,21 @@
       fclose($fp);
       return $saveto;
     }
+
+    public function getLinkedChimes()
+    {
+      $result = array();
+      $json = $this->query('doorbots/'.$this->getVariable('id').'/linked_chimes',$method='GET');
+      if (array_key_exists('linked_chimes',$json))
+      {
+        foreach($json['linked_chimes'] as $chime_conf)
+        {
+          $result[] = $this->client->getDeviceById($chime_conf['id']);
+        }
+      } else {
+        throw new krcpaClassException('',7,json_encode($json));
+      }
+      return $result;
+    }
   }
  ?>
