@@ -282,5 +282,21 @@ final class krcpaTest extends TestCase
         $device->setVolume($vol);
       }
     }
+
+    public function testSnapshot(): void
+    {
+      $client = new KRCPA\Clients\krcpaClient();
+      $client->auth_refresh(self::$conf['refresh_token']);
+      $devices = $client->getDevices();
+      foreach($devices['doorbots'] as $device)
+      {
+        $device->refreshSnapshot();
+        sleep(3);
+        $this->assertIsArray($device->getSnapshotTimestamp());
+        $filename = $device->getSnapshot();
+        $this->assertFileExists($filename);
+        unlink($filename);
+      }
+    }
 }
 ?>

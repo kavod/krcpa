@@ -166,7 +166,7 @@
       return json_encode($this->conf);
     }
 
-    public function query($service,$method='GET',$postfields=array(),$retry=true): array
+    public function query($service,$method='GET',$postfields=array(),$retry=true,$binary=false): array
     {
       $ch = curl_init();
       $opts = self::$CURL_OPTS;
@@ -174,12 +174,19 @@
         $opts[CURLOPT_HTTPGET] = true;
       elseif($method=='PUT')
         $opts[CURLOPT_CUSTOMREQUEST] = "PUT";
+      if ($binary)
+      {
+        $opts[CURLOPT_RETURNTRANSFER] = 1;
+        $opts[CURLOPT_BINARYTRANSFER] = 1;
+      }
       $querystring = '?api_version='.KRCPA_API_VERSION;
       $opts[CURLOPT_URL] = KRCPA_API_URL . $service . $querystring;
+      $opts[CURLINFO_HEADER_OUT] = true;
       $opts[CURLOPT_HTTPHEADER] = array();
 	    $opts[CURLOPT_HTTPHEADER][] = "content-type: application/json; charset=utf-8";
       $opts[CURLOPT_HTTPHEADER][] = "Authorization: " . $this->getVariable('token','');
       $opts[CURLOPT_HTTPHEADER][] = "User-agent: " . KRCPA_USER_AGENT;
+      // print_r($postfields);
       if ($postfields!=array())
         $opts[CURLOPT_POSTFIELDS] = json_encode($postfields);
 
@@ -188,6 +195,8 @@
       $result = curl_exec($ch);
       $errno = curl_errno($ch);
       $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      $info = curl_getinfo($ch);
+      // print_r($info);
       curl_close($ch);
       // print_r($result);
       // print_r($errno);
@@ -196,7 +205,15 @@
         return false;
       }
       list($headers, $body) = explode("\r\n\r\n", $result);
-      $json = json_decode($body,true);
+      switch($info['content_type'])
+      {
+        case 'application/json':
+        case 'application/json; charset=utf-8':
+          $json = json_decode($body,true);
+          break;
+        default:
+          $json = array($body);
+      }
       if ($json == null)
         $json = array();
       if (!$errno) {
