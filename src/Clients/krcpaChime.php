@@ -23,6 +23,8 @@
 
       // Volume
       $this->conf['features']['volume'] = true;
+      // Play sound
+      $this->conf['features']['play_sound'] = true;
     }
 
     public function update_conf($config = array())

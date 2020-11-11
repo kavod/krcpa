@@ -20,6 +20,8 @@
 
       // Volume
       $this->conf['features']['volume'] = true;
+      // Snapshots
+      $this->conf['features']['snapshots'] = true;
     }
 
     public function update_conf($config = array())
