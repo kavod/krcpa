@@ -258,7 +258,7 @@
         }
         if (array_key_exists('doorbots',$devices))
         {
-          return (count($devices['doorbots'])>0);
+          return (count($devices)>0);
         } else {
           return false;
         }
@@ -377,7 +377,20 @@
         }
         return $result;
       } else {
-        return $this->_devices;
+        $result = array();
+        foreach($this->_devices as $device)
+        {
+          switch($device->getVariable('kind'))
+          {
+            case 'chime':
+              $result['chimes'][] = $device;
+              break;
+            case 'doorbell_v4':
+              $result['doorbots'][] = $device;
+              break;
+          }
+        }
+        return $result;
       }
 
     }

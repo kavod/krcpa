@@ -269,6 +269,7 @@ final class krcpaTest extends TestCase
       foreach($devices['doorbots'] as $device)
       {
         $chimes = $device->getLinkedChimes();
+        $this->assertGreaterThan(0,$chimes);
         foreach($chimes as $chime)
         {
           $this->assertInstanceOf(KRCPA\Clients\krcpaChime::class,$chime);
