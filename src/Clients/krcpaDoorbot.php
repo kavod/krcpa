@@ -66,7 +66,24 @@
     {
       if ($saveto == '')
         $saveto = sys_get_temp_dir().'/snapshot.jpg';
-      $image = $this->query('snapshots/image/'.$this->getVariable('id'),$method='GET',$postfields=array(),$retry=true,$binary=true)[0];
+      try {
+        $image = $this->query('snapshots/image/'.$this->getVariable('id'),$method='GET',$postfields=array(),$retry=true,$binary=true)[0];
+      }
+      catch (\KRCPA\Exceptions\krcpaApiException $e)
+      {
+        if ($e->getCode() == 404)
+        {
+          $this->refreshSnapshot();
+          sleep(3);
+          return $this->getSnapshot($saveto);
+        } else {
+          throw $e;
+        }
+      } catch(\Exception $e)
+      {
+        // print_r($e);
+        throw $e;
+      }
       if(file_exists($saveto)){
           unlink($saveto);
       }

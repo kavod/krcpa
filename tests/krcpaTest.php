@@ -277,8 +277,8 @@ final class krcpaTest extends TestCase
       {
         $vol = $device->getVolume();
         $device->setVolume(0);
-        sleep(1);
-        $this->assertTrue($device->playSound());
+        sleep(3);
+        $this->assertTrue($device->playSound('motion'));
         $device->setVolume($vol);
       }
     }
@@ -290,12 +290,13 @@ final class krcpaTest extends TestCase
       $devices = $client->getDevices();
       foreach($devices['doorbots'] as $device)
       {
-        $device->refreshSnapshot();
-        sleep(3);
-        $this->assertIsArray($device->getSnapshotTimestamp());
+        // $device->refreshSnapshot();
+        // sleep(3);
+        // $this->assertIsArray($device->getSnapshotTimestamp());
         $filename = $device->getSnapshot();
         $this->assertFileExists($filename);
         unlink($filename);
+        $this->assertIsArray($device->getSnapshotTimestamp());
       }
     }
 }

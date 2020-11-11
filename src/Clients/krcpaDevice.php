@@ -4,6 +4,8 @@
  *
  */
   namespace KRCPA\Clients;
+  use KRCPA\Exceptions\krcpaApiException;
+  use KRCPA\Exceptions\krcpaClassException;
 
   class krcpaDevice extends krcpaClient
   {
