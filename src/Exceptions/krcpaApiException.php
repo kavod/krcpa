@@ -5,11 +5,15 @@ class krcpaApiException extends krcpaException
   public $http_code;
   public $error;
   public $body;
+  public $headers;
+  public $opts;
 
-  function __construct($message,$code,$body=array())
+  function __construct($message,$code,$body=array(),$headers='',$opts=array())
   {
     $this->http_code = $code;
     $this->error = $message;
+    $this->headers = $headers;
+    $this->opts = $opts;
     if ($body == '') $body = array();
     $this->body = $body;
     parent::__construct($message, $code);
