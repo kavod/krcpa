@@ -194,6 +194,7 @@
       curl_setopt_array($ch, $opts);
       $result = curl_exec($ch);
       $errno = curl_errno($ch);
+      $error = curl_error($ch);
       $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
       $info = curl_getinfo($ch);
       // print_r($info);
@@ -202,7 +203,7 @@
       // print_r($errno);
       if ($result === false)
       {
-        return false;
+        throw new krcpaCurlException($error,$errono);
       }
       list($headers, $body) = explode("\r\n\r\n", $result);
       switch($info['content_type'])
