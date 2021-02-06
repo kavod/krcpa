@@ -98,7 +98,7 @@
     public function getLinkedChimes()
     {
       $result = array();
-      $json = $this->query('doorbots/'.$this->getVariable('id').'/linked_chimes',$method='GET');
+      $json = $this->query('doorbots/'.$this->getVariable('id').'/linked_chimes','GET');
       if (array_key_exists('linked_chimes',$json))
       {
         foreach($json['linked_chimes'] as $chime_conf)
@@ -109,6 +109,26 @@
         throw new krcpaClassException('',7,json_encode($json));
       }
       return $result;
+    }
+
+    public function subscribeMotion()
+    {
+      $this->query('doorbots/'.$this->getVariable('id').'/motions_subscribe','POST');
+    }
+
+    public function unsubscribeMotion()
+    {
+      $this->query('doorbots/'.$this->getVariable('id').'/motions_unsubscribe','POST');
+    }
+
+    public function subscribeRing()
+    {
+      $this->query('doorbots/'.$this->getVariable('id').'/subscribe','POST');
+    }
+
+    public function unsubscribeRing()
+    {
+      $this->query('doorbots/'.$this->getVariable('id').'/unsubscribe','POST');
     }
   }
  ?>

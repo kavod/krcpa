@@ -308,5 +308,21 @@ final class krcpaTest extends TestCase
         $this->assertIsArray($device->getSnapshotTimestamp());
       }
     }
+
+    public function testSubscribe():void
+    {
+      $client = new KRCPA\Clients\krcpaClient();
+      $client->auth_refresh(self::$conf['refresh_token']);
+      $devices = $client->getDevices();
+      foreach($devices['doorbots'] as $device)
+      {
+        $device->subscribeMotion();
+        $device->subscribeRing();
+        sleep(5);
+        $device->unsubscribeMotion();
+        $device->unsubscribeRing();
+        $this->assertTrue(true);
+      }
+    }
 }
 ?>

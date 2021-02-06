@@ -174,6 +174,8 @@
         $opts[CURLOPT_HTTPGET] = true;
       elseif($method=='PUT')
         $opts[CURLOPT_CUSTOMREQUEST] = "PUT";
+      elseif($method=='POST')
+        $opts[CURLOPT_CUSTOMREQUEST] = "POST";
       if ($binary)
       {
         $opts[CURLOPT_RETURNTRANSFER] = 1;
@@ -233,7 +235,8 @@
               return array();
             }
           default:
-            $message = (array_key_exists('error_description',$json)) ? $json['error_description'] : '';
+            $message = (array_key_exists('error_description',$json)) ? $json['error_description'] : 'Unknown error. HTTP Code:'.$http_code;
+            $message = print_r($result,true);
             throw new krcpaApiException($message,$http_code,$json);
             //echo 'Unexpected HTTP code: ', $http_code, "\n";
             return array();
