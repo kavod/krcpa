@@ -8,5 +8,6 @@
     $username = "";
     $password = "";
     $auth_code = "";
+    $uuid = 0;
   }
 ?>

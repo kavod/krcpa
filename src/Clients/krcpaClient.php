@@ -11,7 +11,7 @@
   define('KRCPA_API_URL', "https://api.ring.com/clients_api/");
   define('KRCPA_OAUTH_URL', "https://oauth.ring.com/oauth/token");
   define('KRCPA_API_VERSION', "9");
-  define('KRCPA_USER_AGENT','ring/5.21.0.5 CFNetwork/1121.2.2 Darwin/19.2.0');
+  define('KRCPA_USER_AGENT','kring/0.1');
 
   class krcpaClient
   {
@@ -55,6 +55,11 @@
       foreach ($config as $name => $value)
       {
           $this->setVariable($name, $value);
+      }
+
+      if (!array_key_exists('uuid',$config))
+      {
+        $this->setVariable('uuid',self::guidv4());
       }
     }
 
@@ -123,6 +128,8 @@
       $opts[CURLOPT_HTTPHEADER][] = "Content-Type: application/json";
       if ($this->getVariable('auth_code','') != '')
         $opts[CURLOPT_HTTPHEADER][] = "2fa-code: ".$this->getVariable('auth_code','');
+      $opts[CURLOPT_HTTPHEADER][] = "hardware_id: ".$this->getVariable('uuid','');
+      $opts[CURLOPT_HTTPHEADER][] = "User-agent: " . KRCPA_USER_AGENT;
       $opts[CURLOPT_URL] = KRCPA_OAUTH_URL;
 
       //print_r($opts);
@@ -188,6 +195,7 @@
 	    $opts[CURLOPT_HTTPHEADER][] = "content-type: application/json; charset=utf-8";
       $opts[CURLOPT_HTTPHEADER][] = "Authorization: " . $this->getVariable('token','');
       $opts[CURLOPT_HTTPHEADER][] = "User-agent: " . KRCPA_USER_AGENT;
+      // $opts[CURLOPT_HTTPHEADER][] = "hardware_id: ".$this->getVariable('uuid','');
       // print_r($postfields);
       if ($postfields!=array())
         $opts[CURLOPT_POSTFIELDS] = json_encode($postfields);
@@ -234,10 +242,23 @@
             } else {
               return array();
             }
+          case 404: # Not found
+            if (array_key_exists('error',$json))
+            {
+              $error = $json['error'];
+              $pattern = '/Client Device with [0-9|a-f|\-]+ not found/';
+              if (preg_match($pattern,$error))
+              {
+                $this->refreshSession();
+                return $this->query($service,$method,$postfields,false,$binary);
+              }
+            }
+            throw new krcpaApiException(print_r($json,true),$http_code,$json);
+            break;
           default:
             $message = (array_key_exists('error_description',$json)) ? $json['error_description'] : 'Unknown error. HTTP Code:'.$http_code;
-            $message = print_r($result,true);
-            throw new krcpaApiException($message,$http_code,$json);
+            $message = print_r($opts,true);
+            throw new krcpaApiException($message,$http_code,$json,$headers,$opts);
             //echo 'Unexpected HTTP code: ', $http_code, "\n";
             return array();
         }
@@ -270,6 +291,30 @@
       }
     }
 
+    public function refreshSession()
+    {
+      $arr_post = array(
+        "device" => array(
+          "hardware_id" => $this->getVariable('uuid',''),
+          "metadata" => array(
+            "api_version" => KRCPA_API_VERSION,
+            "device_model" => 'kring'
+          ),
+          "os" => "android"
+        )
+      );
+
+      $session = $this->query('session',$method='POST');
+      if (array_key_exists('profile',$session))
+      {
+        $profile = $session['profile'];
+        if (array_key_exists('hardware_id',$profile))
+        {
+          $this->setVariable('hardware_id', $profile['hardware_id']);
+        }
+      }
+    }
+
     // Getters
     /**
      * Returns a persistent variable.
@@ -291,6 +336,18 @@
 
     public static function getVersion() {
       return KRCPA_VERSION;
+    }
+
+    public static function guidv4($data = 0)
+    {
+      if ($data == 0)
+        $data = openssl_random_pseudo_bytes(16);
+      assert(strlen($data) == 16);
+
+      $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
+      $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+
+      return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
     public function getDeviceByAttr($attr,$value,$resync=false)

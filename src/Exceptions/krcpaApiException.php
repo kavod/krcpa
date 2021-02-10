@@ -24,5 +24,14 @@ class krcpaApiException extends krcpaException
     $http_codes = parse_ini_file(__DIR__ ."/http_codes.ini");
     return $http_codes[$this->http_code];
   }
+
+  public function __toString ( ) : string
+  {
+    $return = parent::__toString();
+    $return .= print_r($opts,true);
+    $return .= print_r($headers,true);
+    $return .= print_r($body,true);
+    return $return;
+  }
 }
 ?>

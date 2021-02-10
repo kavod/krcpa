@@ -17,7 +17,8 @@ final class krcpaTest extends TestCase
         "username" => $username,
         "password" => $password,
         "auth_code" => $auth_code,
-        "refresh_token" => $refresh_token
+        "refresh_token" => $refresh_token,
+        "uuid" => $uuid
       );
       self::$ref_client = new KRCPA\Clients\krcpaClient(self::$conf);
       // $dev = new kavod\Clients\krcpaDoorbot(self::$ref_client,self::$conf);
